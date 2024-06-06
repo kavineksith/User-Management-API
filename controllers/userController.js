@@ -1,157 +1,75 @@
-const db = require('../data/database.js');
+const UserModel = require('../models/userModel.js');
+const { validationResult } = require('express-validator');
 const { validateInput } = require('./middleware/validateInputs.js');
-const { check } = require('express-validator');
 
-// Post Method (Insert data into database)
-const createUser = ([
-    check('fname').notEmpty().withMessage('First name is required'),
-    check('lname').notEmpty().withMessage('Last name is required'),
-    check('dateOfBirth').notEmpty().withMessage('Date of birth is required'),
-    check('address').notEmpty().withMessage('Address is required'),
-    check('emailAddress').notEmpty().withMessage('Email address is required').isEmail().withMessage('Invalid email address'),
-    check('contactNumber').notEmpty().withMessage('Contact number is required'),
-    check('country').notEmpty().withMessage('Country is required')
-], validateInput, (req, res, next) => {
+// Controller function to create a user
+const createUser = async (req, res, next) => {
     try {
-        const {
-            fname,
-            lname,
-            dateOfBirth,
-            address,
-            emailAddress,
-            contactNumber,
-            country
-        } = req.body;
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
 
-        let query = 'INSERT INTO users (fname, lname, dateOfBirth, address, emailAddress, contactNumber, country)VALUES(?,?,?,?,?,?,?)';
-        let values = [fname, lname, dateOfBirth, address, emailAddress, contactNumber, country];
-
-        db.run(query, values, function (err) {
-            if (err) {
-                res.status(400).json({ "error": err.message })
-                return;
-            } else {
-                res.status(201).json({
-                    "message": "User Information stored successfully...!!"
-                })
-            }
-        });
-    } catch (E) {
-        res.status(400).send(E);
-    }
-});
-
-// Get Method (retrive data from database)
-const readUsers = (req, res, next) => {
-    try {
-        let query = "SELECT * FROM users";
-
-        db.all(query, function (err, rows) {
-            if (err) {
-                res.status(400).json({ "error": err.message })
-                return;
-            } else {
-                res.status(201).json({
-                    "data": rows
-                })
-            }
-        });
-    } catch (E) {
-        res.status(400).send(E);
+        const result = await UserModel.createUser(req.body);
+        res.status(201).json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
 
-// Get Method (retrive data from database within specific users from User ID)
-const readUser = ([
-    check('id').notEmpty().withMessage('ID is required')
-], validateInput, (req, res, next) => {
+// Controller function to retrieve all users
+const readUsers = async (req, res, next) => {
     try {
-        const { id } = req.params.id;
-        let query = "SELECT * FROM users WHERE userID = ?";
-        let params = [id];
-
-        db.all(query, params, function (err, rows) {
-            if (err) {
-                res.status(400).json({ "error": err.message })
-                return;
-            } else {
-                res.status(201).json({
-                    "data": rows
-                })
-            }
-        });
-    } catch (E) {
-        res.status(400).send(E);
+        const users = await UserModel.readUsers();
+        res.status(200).json({ data: users });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-});
+};
 
-// Put Method (updating data from database within specific users from User ID)
-const updateUser = ([
-    check('id').notEmpty().withMessage('ID is required'),
-    check('fname').notEmpty().withMessage('First name is required'),
-    check('lname').notEmpty().withMessage('Last name is required'),
-    check('dateOfBirth').notEmpty().withMessage('Date of birth is required'),
-    check('address').notEmpty().withMessage('Address is required'),
-    check('emailAddress').notEmpty().withMessage('Email address is required').isEmail().withMessage('Invalid email address'),
-    check('contactNumber').notEmpty().withMessage('Contact number is required'),
-    check('country').notEmpty().withMessage('Country is required')
-], validateInput, (req, res, next) => {
+// Controller function to retrieve a user by ID
+const readUser = async (req, res, next) => {
     try {
-        const {
-            id
-        } = req.params.id;
-        const {
-            fname,
-            lname,
-            dateOfBirth,
-            address,
-            emailAddress,
-            contactNumber,
-            country
-        } = req.body;
-
-        let query = 'UPDATE users SET fname=?, lname=?, dateOfBirth=?, address=?, emailAddress=?, contactNumber=?, country=? WHERE userID=?';
-        let values = [fname, lname, dateOfBirth, address, emailAddress, contactNumber, country, id];
-
-        db.run(query, values, function (err) {
-            if (err) {
-                res.status(400).json({ "error": err.message })
-                return;
-            } else {
-                res.status(201).json({
-                    "message": "User Information modified successfully...!!",
-                    updated: this.changes
-                })
-            }
-        });
-    } catch (E) {
-        res.status(400).send(E);
+        const user = await UserModel.readUser(req.params.id);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.status(200).json({ data: user });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-});
+};
 
-// Delete Method (removing data from database within specific users from User ID)
-const deleteUser = ([
-    check('id').notEmpty().withMessage('ID is required')
-], validateInput, (req, res, next) => {
+// Controller function to update a user by ID
+const updateUser = async (req, res, next) => {
     try {
-        let query = "DELETE FROM users WHERE userID = ?";
-        let params = [id];
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
 
-        db.run(query, params, function (err) {
-            if (err) {
-                res.status(400).json({ "error": err.message })
-                return;
-            } else {
-                res.status(201).json({
-                    "message": "User Information removed successfully...!!",
-                    updated: this.changes
-                })
-            }
-        });
-    } catch (E) {
-        res.status(400).send(E);
+        const result = await UserModel.updateUser(req.params.id, req.body);
+        if (!result) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-});
+};
+
+// Controller function to delete a user by ID
+const deleteUser = async (req, res, next) => {
+    try {
+        const result = await UserModel.deleteUser(req.params.id);
+        if (!result) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 module.exports = {
     createUser,

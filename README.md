@@ -8,23 +8,26 @@ To get started with the User Management API, follow the steps below:
 
 1. Clone the repository containing the API source code.
    ```
-   git clone https://github.com/kavineksith/User-Management-API-with-Node-JS.git
+   git clone https://github.com/kavineksith/User-Management-API.git
+   ```
+2. Navigate to the User-Management-API project directory:
+   ```
    cd User-Management-API-with-Node-JS
    ```
 
-2. Install the required dependencies by running `npm install`.
+3. Install the required dependencies by running `npm install`.
    ```
    npm install
    ```
 
-3. Database Initialization
+4. Database Initialization
    - Ensure SQLite is installed on your system.
    - Run the following command to initialize the database:
      ```
      node ./data/database.js
      ```
 
-4. Start the server by running `node app.js`.
+5. Start the server by running `node app.js`.
    ```
    node app.js
    ```

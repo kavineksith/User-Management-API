@@ -12,7 +12,7 @@ To get started with the User Management API, follow the steps below:
    ```
 2. Navigate to the User-Management-API project directory:
    ```
-   cd User-Management-API-with-Node-JS
+   cd User-Management-API
    ```
 
 3. Install the required dependencies by running `npm install`.
@@ -150,5 +150,5 @@ The User Management API provides a robust solution for managing user data with c
 ## **License**
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-### **Disclaimer:**
+### **Disclaimer**
 Kindly note that this project is developed solely for educational purposes, not intended for industrial use, as its sole intention lies within the realm of education. We emphatically underscore that this endeavor is not sanctioned for industrial application. It is imperative to bear in mind that any utilization of this project for commercial endeavors falls outside the intended scope and responsibility of its creators. Thus, we explicitly disclaim any liability or accountability for such usage.
